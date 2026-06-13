@@ -1,0 +1,33 @@
+name: Update CF IPs TXT
+
+on:
+  schedule:
+    - cron: '7 */1 * * *'  # 每小时第7分钟执行
+  workflow_dispatch:  # 支持手动触发
+  push:
+    branches: [main]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Fetch and Convert to TXT
+        run: |
+          # 获取原始数据
+          curl -s https://ip.164746.xyz/ipTop10.html | tr ',' '\n' > ipTop10.txt
+          
+          # 添加更新时间戳（可选）
+          echo "# Updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" | cat - ipTop10.txt > temp && mv temp ipTop10.txt
+      
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ipTop10.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🔄 Update IPs: $(date -u '+%Y-%m-%d %H:%M')" && git push)
