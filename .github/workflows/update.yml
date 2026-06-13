@@ -2,8 +2,8 @@ name: Update CF IPs TXT
 
 on:
   schedule:
-    - cron: '7 */1 * * *'  # 每小时第7分钟执行
-  workflow_dispatch:  # 支持手动触发
+    - cron: '7 */1 * * *'
+  workflow_dispatch:
   push:
     branches: [main]
 
@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
     steps:
       - name: Checkout
@@ -19,9 +21,7 @@ jobs:
       
       - name: Fetch and Convert to TXT
         run: |
-          # 获取原始数据
           curl -s https://ip.164746.xyz/ipTop10.html | tr ',' '\n' > ipTop10.txt
-      
       
       - name: Commit and Push
         run: |
