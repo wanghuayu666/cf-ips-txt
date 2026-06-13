@@ -21,9 +21,7 @@ jobs:
         run: |
           # 获取原始数据
           curl -s https://ip.164746.xyz/ipTop10.html | tr ',' '\n' > ipTop10.txt
-          
-          # 添加更新时间戳（可选）
-          echo "# Updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" | cat - ipTop10.txt > temp && mv temp ipTop10.txt
+      
       
       - name: Commit and Push
         run: |
