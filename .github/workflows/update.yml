@@ -14,15 +14,26 @@ jobs:
       contents: write
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: Fetch and Convert to TXT
+
+      - name: Fetch and Merge IPs
         run: |
-          curl -s https://ip.164746.xyz/ipTop10.html | tr ',' '\n' > ipTop10.txt
-      
+          # 提取164746的所有IP，格式化为 IP#CF优选-XX
+          curl -s https://ip.164746.xyz/ipTop10.html | \
+            tr ',' '\n' | \
+            grep -v '^$' | \
+            awk '{printf "%s#CF优选-%02d\n", $0, NR}' > ipTop10.txt
+
+          # 提取uouin电信的前10个IP，格式化为 IP#CF电信-XX，追加到文件
+          curl -s https://api.uouin.com/cloudflare.html | \
+            grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | \
+            awk '!seen[$0]++' | \
+            head -10 | \
+            awk '{printf "%s#CF电信-%02d\n", $0, NR}' >> ipTop10.txt
+
       - name: Commit and Push
         run: |
           git config user.name "github-actions[bot]"
